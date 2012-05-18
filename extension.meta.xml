@@ -25,7 +25,7 @@
 
 	<releases>
 		<release version="1.0.1" date="2012-05-18" min="2.3"><![CDATA[
-			* Initial release
+			* Move `Maximum entries` input below section `Name` on section settings page.
 		]]></release>
 
 		<release version="1.0" date="2012-05-18" min="2.3"><![CDATA[
