@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<extension id="section_entries" status="released" xmlns="http://symphony-cms.com/schemas/extension/1.0">
+<extension id="limit_section_entries" status="released" xmlns="http://symphony-cms.com/schemas/extension/1.0">
 
 	<name>Limit Section Entries</name>
 
 	<description>Offers a way to limit the maximum number of entries in a section.</description>
 
-	<repo type="github">https://github.com/vlad-ghita/section_entries</repo>
+	<repo type="github">https://github.com/vlad-ghita/limit_section_entries</repo>
+
+	<url type="discuss">http://symphony-cms.com/discuss/thread/61887/</url>
 
 	<types>
 		<type>Interface</type>
