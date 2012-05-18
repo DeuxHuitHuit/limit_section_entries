@@ -1,6 +1,8 @@
 Section entries
 ==============
 
+Github repo: <https://github.com/vlad-ghita/section_entries>
+
 ## 1 About ##
 
 Offers a way to limit the maximum number of entries in a section.
