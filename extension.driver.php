@@ -9,7 +9,7 @@
 
 
 
-	Class Extension_Section_Entries extends Extension
+	Class Extension_Limit_Section_Entries extends Extension
 	{
 		const DB_TABLE = 'tbl_sections';
 
