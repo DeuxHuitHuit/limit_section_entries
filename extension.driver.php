@@ -255,7 +255,7 @@
 			$label->appendChild(new XMLElement('p', __('Limit the maximum number of entries to this positive integer value. Let 0 or empty for unlimited.'), array('class' => 'help')));
 
 			$fieldset = $context['form']->getChildByName('fieldset', 0);
-			$fieldset->insertChildAt(1, $label);
+			$fieldset->appendChild($label);
 		}
 
 		public function dSaveSectionSettings($context){
