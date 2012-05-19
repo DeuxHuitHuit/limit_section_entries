@@ -69,6 +69,8 @@
 
 					return $this->install();
 				}
+				
+				return false;
 			}
 
 			$this->_tried_installation = true;
