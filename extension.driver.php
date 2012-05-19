@@ -290,10 +290,34 @@
 			return true;
 		}
 
+		private function _fetchEntryID(){
+			EntryManager::setFetchSortingDirection('DESC');
+			$entry = EntryManager::fetch(NULL, $this->_section->get('id'), 1);
+
+			if( is_array($entry) && !empty($entry) ){
+				$entry = current($entry);
+				return (int)$entry->get('id');
+			}
+
+			return null;
+		}
+
 		private function _fetchMaxEntries(){
 			$count = (int) $this->_section->get('max_entries');
 
 			return $count;
+		}
+
+		private function _fetchSection($callback){
+			if( !isset($callback['context']['section_handle']) ) return null;
+			
+			$section_id = (int) SectionManager::fetchIDFromHandle($callback['context']['section_handle']);
+
+			$section = SectionManager::fetch($section_id);
+
+			if( !$section instanceof Section ) return null;
+
+			return $section;
 		}
 
 		private function _fetchTotalEntries(){
@@ -312,28 +336,6 @@
 			}
 
 			return (int) $count;
-		}
-
-		private function _fetchEntryID(){
-			EntryManager::setFetchSortingDirection('DESC');
-			$entry = EntryManager::fetch(NULL, $this->_section->get('id'), 1);
-
-			if( is_array($entry) && !empty($entry) ){
-				$entry = current($entry);
-				return (int)$entry->get('id');
-			}
-
-			return null;
-		}
-
-		private function _fetchSection($callback){
-			$section_id = SectionManager::fetchIDFromHandle($callback['context']['section_handle']);
-
-			$section = SectionManager::fetch($section_id);
-
-			if( !$section instanceof Section ) return null;
-
-			return $section;
 		}
 
 		private function _fetchUrlParams(){
