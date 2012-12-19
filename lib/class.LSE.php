@@ -49,7 +49,7 @@
 		 * @return int|null
 		 */
 		public static function getLastEntryID($section = null){
-			$s = self::getSection( $section );
+			if( ! $s = self::getSection( $section ) ) return null;
 
 			EntryManager::setFetchSortingDirection( 'DESC' );
 			$entry = EntryManager::fetch( null, $s->get( 'id' ), 1 );
@@ -71,7 +71,7 @@
 		 * @return int
 		 */
 		public static function getTotalEntries($section = null){
-			$s = self::getSection( $section );
+			if( ! $s = self::getSection( $section ) ) return null;
 
 			try{
 				$count = Symphony::Database()->fetch( sprintf(
@@ -98,7 +98,7 @@
 		 * @return int
 		 */
 		public static function getMaxEntries($section = null){
-			$s = self::getSection( $section );
+			if( ! $s = self::getSection( $section ) ) return null;
 
 			$count = (int) $s->get( 'max_entries' );
 
