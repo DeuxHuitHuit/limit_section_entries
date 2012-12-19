@@ -193,27 +193,22 @@
 		public function dAppendPageAlert(){
 			$callback = Administration::instance()->getPageCallback();
 
-			// manipulate Alert message
+			// manipulate success message
 			if( in_array($callback['context']['page'], array('new', 'edit')) ){
 				$flag_create = false;
 				$flag_all = false;
 
-				// static section ?
-				if( $this->_max === 1 ){
+				// if entry was created or saved
+				if( isset($callback['context']['flag']) ){
 
-					// need a create message
-					if( isset($callback['context']['flag']) ){
+					// if there is a limit
+					if( $this->_max > 0 ){
 						$flag_create = true;
-					}
-				}
 
-				// limit exceeded ?
-				else if( $this->_max > 0 && $this->_total >= $this->_max ){
-
-					// need a create message and view all message
-					if( isset($callback['context']['flag']) ){
-						$flag_create = true;
-						$flag_all = true;
+						// if not static section
+						if( $this->_max > 1 ){
+							$flag_all = true;
+						}
 					}
 				}
 
