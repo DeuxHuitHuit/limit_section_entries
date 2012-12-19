@@ -103,6 +103,11 @@
 				),
 				array(
 					'page' => '/backend/',
+					'delegate' => 'AppendPageAlert',
+					'callback' => 'dAppendPageAlert'
+				),
+				array(
+					'page' => '/backend/',
 					'delegate' => 'AdminPagePreGenerate',
 					'callback' => 'dAdminPagePreGenerate'
 				),
@@ -181,6 +186,79 @@
 					if( $this->_total >= $this->_max ){
 						$this->_redirect(SYMPHONY_URL."/publish/{$section_handle}/{$params}");
 					}
+				}
+			}
+		}
+
+		public function dAppendPageAlert(){
+			$callback = Administration::instance()->getPageCallback();
+
+			// manipulate Alert message
+			if( in_array($callback['context']['page'], array('new', 'edit')) ){
+				$flag_create = false;
+				$flag_all = false;
+
+				// static section ?
+				if( $this->_max === 1 ){
+
+					// need a create message
+					if( isset($callback['context']['flag']) ){
+						$flag_create = true;
+					}
+				}
+
+				// limit exceeded ?
+				else if( $this->_max > 0 && $this->_total >= $this->_max ){
+
+					// need a create message and view all message
+					if( isset($callback['context']['flag']) ){
+						$flag_create = true;
+						$flag_all = true;
+					}
+				}
+
+				// if the status message must be changed
+				if( $flag_create || $flag_all ){
+					$alerts = Administration::instance()->Page->Alert;
+
+					// remove old message
+					foreach( $alerts as $key => $alert ){
+						/** @var $alert Alert */
+						if( $alert->type === Alert::SUCCESS ){
+							unset($alerts[$key]);
+						}
+					}
+
+					$msg_create = '';
+					$msg_all = '';
+
+					// create / update message
+					if( $flag_create === true ){
+						switch($callback['context']['flag']){
+							case 'saved':
+								$msg_create = __('Entry updated at %s.', array(Widget::Time('now')->generate()));
+								break;
+
+							case 'created':
+								$msg_create = __('Entry created at %s.', array(Widget::Time('now')->generate()));
+								break;
+						}
+					}
+
+					// view all message
+					if( $flag_all === true ){
+						$link = '/publish/'.$callback['context']['section_handle'] . '/';
+
+						$msg_all = ' <a href="' . SYMPHONY_URL . $link . '" accesskey="a">'
+							. __('View all Entries')
+							. '</a>';
+					}
+
+					// append alert
+					$alerts[] = new Alert($msg_create.$msg_all, Alert::SUCCESS);
+
+					// replace Alerts
+					Administration::instance()->Page->Alert = $alerts;
 				}
 			}
 		}
