@@ -48,7 +48,7 @@
 		 *
 		 * @return int|null
 		 */
-		public static function getLastEntryID($section){
+		public static function getLastEntryID($section = null){
 			$s = self::getSection( $section );
 
 			EntryManager::setFetchSortingDirection( 'DESC' );
@@ -70,7 +70,7 @@
 		 *
 		 * @return int
 		 */
-		public static function getTotalEntries($section){
+		public static function getTotalEntries($section = null){
 			$s = self::getSection( $section );
 
 			try{
@@ -97,7 +97,7 @@
 		 *
 		 * @return int
 		 */
-		public static function getMaxEntries($section){
+		public static function getMaxEntries($section = null){
 			$s = self::getSection( $section );
 
 			$count = (int) $s->get( 'max_entries' );
