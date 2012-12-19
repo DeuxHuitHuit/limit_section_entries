@@ -4,8 +4,7 @@
 
 
 
-	require_once(TOOLKIT.'/class.entrymanager.php');
-	require_once(TOOLKIT.'/class.sectionmanager.php');
+	require_once('lib/class.LSE.php');
 
 
 
@@ -69,8 +68,6 @@
 
 					return $this->install();
 				}
-				
-				return false;
 			}
 
 			$this->_tried_installation = true;
@@ -141,15 +138,15 @@
 			$this->_enabled = $this->_enable($callback);
 			if( !$this->_enabled ) return false;
 
-			$this->_section = $this->_fetchSection($callback);
+			$this->_section = LSE::getSection($callback['context']['section_handle']);
 			if( is_null($this->_section) ){
 				$this->_enabled = false;
 				return false;
 			}
 
-			$this->_max = $this->_fetchMaxEntries();
-			$this->_total = $this->_fetchTotalEntries();
-			$entry_id = $this->_fetchEntryID();
+			$this->_max = LSE::getMaxEntries($this->_section);
+			$this->_total = LSE::getTotalEntries($this->_section);
+			$entry_id = LSE::getLastEntryID($this->_section);
 			$params = $this->_fetchUrlParams();
 			$section_handle = $this->_section->get('handle');
 
@@ -157,29 +154,35 @@
 			/* Manage redirects */
 
 			// index page
-			if( $callback['context']['page'] === 'index' )
+			if( $callback['context']['page'] === 'index' ){
 
 				// emulate Static section
-				if( $this->_max === 1 )
+				if( $this->_max === 1 ){
 
 					// entry exists, proceed to edit page
-					if( $this->_total > 0 && is_int($entry_id) )
+					if( $this->_total > 0 && is_int($entry_id) ){
 						$this->_redirect(SYMPHONY_URL."/publish/{$section_handle}/edit/{$entry_id}/{$params}");
+					}
 
-					// if no entries, proceed to new page
-					else
+					// in no entries, proceed to new page
+					else{
 						$this->_redirect(SYMPHONY_URL."/publish/{$section_handle}/new/{$params}");
+					}
+				}
+			}
 
 			// new page
-			elseif( $callback['context']['page'] === 'new' )
+			elseif( $callback['context']['page'] === 'new' ){
 
 				// only if there is a limit
-				if( $this->_max > 0 )
+				if( $this->_max > 0 ){
 
 					// if limit exceeded, proceed to index page
-					if( $this->_total >= $this->_max )
+					if( $this->_total >= $this->_max ){
 						$this->_redirect(SYMPHONY_URL."/publish/{$section_handle}/{$params}");
-
+					}
+				}
+			}
 		}
 
 		public function dAdminPagePreGenerate($context){
@@ -190,7 +193,7 @@
 			// index page
 			if( $callback['context']['page'] === 'index' ){
 
-				/* Hide "Create New" button */
+				/* Create button */
 
 				if( $this->_max > 0 && $this->_total >= $this->_max ){
 					$context['oPage']->Context->getChild(1)->removeChildAt(0);
@@ -219,20 +222,19 @@
 
 				$feedback = $msg_total_entries.$msg_max_entries.'. '.$msg_create_more;
 
-				$context['oPage']->Contents->prependChild(
-					new XMLElement('p', $feedback, array('style' => 'margin: 10px 0 0 18px;'))
-				);
+				$context['oPage']->Contents->prependChild(new XMLElement('p', $feedback, array('style' => 'margin: 10px 0 0 18px;')));
 			}
 
 			// new/edit page
 			elseif( in_array($callback['context']['page'], array('new', 'edit')) ){
 
-				/* Replace breadcrumbs (emulate static section) */
-
+				// replace breadcrumbs (emulate static section)
 				if( $this->_max === 1 ){
 					$breadcrumbs = $context['oPage']->Context->getChild(0);
 
-					for( $count=$breadcrumbs->getNumberOfChildren(), $i=$count-1; $i>=0; $i-- )
+					$children_count = $breadcrumbs->getNumberOfChildren();
+
+					for( $i=$children_count-1; $i>=0; $i-- )
 						$breadcrumbs->removeChildAt($i);
 
 					$breadcrumbs->appendChild(new XMLElement('h2', $this->_section->get('name')));
@@ -284,84 +286,6 @@
 			return true;
 		}
 
-		/**
-		 * Retrieve the ID of last entry in current section.
-		 *
-		 * @return int|null
-		 */
-		private function _fetchEntryID(){
-			EntryManager::setFetchSortingDirection('DESC');
-			$entry = EntryManager::fetch(null, $this->_section->get('id'), 1);
-
-			if( is_array($entry) && !empty($entry) ){
-				$entry = current($entry);
-				return (int)$entry->get('id');
-			}
-
-			return null;
-		}
-
-		/**
-		 * Retrieve the maximum number of entries for current section.
-		 *
-		 * @return int
-		 */
-		private function _fetchMaxEntries(){
-			$count = $this->_section->get('max_entries');
-
-			return (int) $count;
-		}
-
-		/**
-		 * Retrieve current section object. If the section is not found, returns null.
-		 *
-		 * @param $callback (optional) - page callback
-		 *
-		 * @return Section|null
-		 */
-		private function _fetchSection($callback = null){
-			if( is_null($callback) )
-				$callback = Administration::instance()->getPageCallback();
-
-			if( !isset($callback['context']['section_handle']) ) return null;
-			
-			$section_id = (int) SectionManager::fetchIDFromHandle($callback['context']['section_handle']);
-
-			$section = SectionManager::fetch($section_id);
-
-			if( !$section instanceof Section ) return null;
-
-			return $section;
-		}
-
-		/**
-		 * Retrieve the number of entries in current section.
-		 *
-		 * @return int
-		 */
-		private function _fetchTotalEntries(){
-			try{
-				$count = Symphony::Database()->fetch(sprintf(
-					"SELECT COUNT(*) FROM `%s` WHERE `section_id` = '%s'",
-					'tbl_entries', $this->_section->get('id')
-				));
-
-				if( is_array($count) ){
-					$count = $count[0]['COUNT(*)'];
-				}
-			}
-			catch( DatabaseException $dbe ){
-				$count = 0;
-			}
-
-			return (int) $count;
-		}
-
-		/**
-		 * Prepare the query string for re-transmit.
-		 *
-		 * @return string
-		 */
 		private function _fetchUrlParams(){
 			if( count($_GET) > 2 ){
 				$params = "?";
@@ -379,11 +303,6 @@
 			return $params;
 		}
 
-		/**
-		 * Cleaner redirect method.
-		 *
-		 * @param $url
-		 */
 		private function _redirect($url){
 			header('HTTP/1.1 303 See Other');
 			redirect($url);

@@ -10,9 +10,6 @@
 		'release-date' => '2012-05-18'
 	);
 
-	/**
-	 * Section Entries
-	 */
 	$dictionary = array(
 
 		'There is %d entry' =>
