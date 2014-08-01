@@ -322,11 +322,14 @@
 		/*------------------------------------------------------------------------------------------------*/
 
 		public function dAddSectionElements($context){
+			$fieldset = new XMLElement('fieldset', null, array('class' => 'settings'));
+			$legend = new XMLElement('legend', __('Limit Section Entries'));
 			$label = Widget::Label(__('Maximum entries'));
 			$label->appendChild(Widget::Input("meta[max_entries]", $context['meta']['max_entries']));
 			$label->appendChild(new XMLElement('p', __('Limit the maximum number of entries to this positive integer value. Let 0 or empty for unlimited.'), array('class' => 'help')));
-
-			$context['form']->getChildByName('fieldset', 0)->appendChild($label);
+			$fieldset->appendChild($legend);
+			$fieldset->appendChild($label);
+			$context['form']->insertChildAt(2, $fieldset);
 		}
 
 		public function dSaveSectionSettings($context){
