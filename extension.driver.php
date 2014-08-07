@@ -326,7 +326,7 @@
 			$legend = new XMLElement('legend', __('Limit Section Entries'));
 			$label = Widget::Label(__('Maximum entries'));
 			$label->appendChild(Widget::Input("meta[max_entries]", $context['meta']['max_entries']));
-			$label->appendChild(new XMLElement('p', __('Limit the maximum number of entries to this positive integer value. Let 0 or empty for unlimited.'), array('class' => 'help')));
+			$label->appendChild(new XMLElement('p', __('Limit the maximum number of entries to this positive integer value. Set as 0 or leave empty for unlimited entries.'), array('class' => 'help')));
 			$fieldset->appendChild($legend);
 			$fieldset->appendChild($label);
 			$context['form']->insertChildAt(2, $fieldset);
