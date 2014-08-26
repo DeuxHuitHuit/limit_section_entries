@@ -1,7 +1,7 @@
 Limit Section Entries
 ==============
 
-Github repo: <https://github.com/vlad-ghita/limit_section_entries>
+Github repo: <https://github.com/DeuxHuitHuit/limit_section_entries>
 
 ## 1 About ##
 
@@ -21,3 +21,7 @@ Offers a way to limit the maximum number of entries in a section.
 ## 3 Usage ##
 
 Go to section editor.
+
+## Original author
+
+The original author of this project is @vlad-ghita. Respect.
