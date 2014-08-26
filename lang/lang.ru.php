@@ -39,7 +39,7 @@
 		'Maximum entries' => 
 		'Максимум записей',
 
-		'Limit the maximum number of entries to this positive integer value. Let 0 or empty for unlimited.' => 
+		'Limit the maximum number of entries to this positive integer value. Set as 0 or leave empty for unlimited entries' => 
 		'Ограничить максимальное количество записей указав положительное целое число. Укажите 0 или оставьте пустым поле для снятия ограничений.',
 
 	);

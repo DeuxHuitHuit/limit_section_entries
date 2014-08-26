@@ -36,7 +36,7 @@
 		'Maximum entries' => 
 		'Numar maxim de inregistrari',
 
-		'Limit the maximum number of entries to this positive integer value. Let 0 or empty for unlimited.' => 
+		'Limit the maximum number of entries to this positive integer value. Set as 0 or leave empty for unlimited entries' => 
 		'Limiteaza numarul maxim de inregistrari la acest numar natural. Lasati 0 sau gol pentru nelimitat.',
 
 	);

@@ -1,6 +1,6 @@
 <?php
 
-  $about = array(
+	$about = array(
 		'name' => 'Italian',
 		'author' => array(
 			'name' => 'Davide Grobberio',
@@ -36,7 +36,7 @@
 		'Maximum entries' => 
 		'Voci max',
 
-		'Limit the maximum number of entries to this positive integer value. Let 0 or empty for unlimited.' => 
+		'Limit the maximum number of entries to this positive integer value. Set as 0 or leave empty for unlimited entries' => 
 		'Inserire il numero limite di voci creabili per questa sezione. Lasciare vuoto o inserire 0 per un numero illimitato.'
 
 	);
