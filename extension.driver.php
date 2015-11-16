@@ -275,13 +275,13 @@
 
 				/* Feedback message */
 
-				$msg_total_entries = $this->_total === 1
-					? __('There is %d entry', array($this->_total))
-					: __('There are %d entries', array($this->_total));
-
-				$msg_max_entries = '';
-				$msg_create_more = '';
 				if( $this->_max !== 0 ){
+					$msg_total_entries = $this->_total === 1
+						? __('There is %d entry', array($this->_total))
+						: __('There are %d entries', array($this->_total));
+
+					$msg_max_entries = '';
+					$msg_create_more = '';
 					$msg_max_entries =  __(' out of a maximum of ') . $this->_max;
 					if( $this->_total >= $this->_max ){
 						$msg_create_more = __("You can't create more entries.");
@@ -291,11 +291,10 @@
 						$msg_create_more = __("You can create %d more", array($diff));
 						$msg_create_more .= ' ' . ($diff === 1 ? __('entry') : __('entries')) . '.';
 					}
+					$feedback = $msg_total_entries.$msg_max_entries.'. '.$msg_create_more;
+
+					$context['oPage']->Context->appendChild(new XMLElement('p', $feedback, array('style' => 'padding: 10px 0 20px 0; margin: 0;')));
 				}
-
-				$feedback = $msg_total_entries.$msg_max_entries.'. '.$msg_create_more;
-
-				$context['oPage']->Context->appendChild(new XMLElement('p', $feedback, array('style' => 'padding: 10px 0 20px 0; margin: 0;')));
 			}
 
 			// new/edit page
