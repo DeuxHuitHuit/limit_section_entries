@@ -295,7 +295,7 @@
 
 				$feedback = $msg_total_entries.$msg_max_entries.'. '.$msg_create_more;
 
-				$context['oPage']->Contents->prependChild(new XMLElement('p', $feedback, array('style' => 'margin: 10px 0 0 18px;')));
+				$context['oPage']->Context->appendChild(new XMLElement('p', $feedback, array('style' => 'padding: 10px 0 20px 0; margin: 0;')));
 			}
 
 			// new/edit page
