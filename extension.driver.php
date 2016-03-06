@@ -1,14 +1,10 @@
 <?php
 
-if( !defined('__IN_SYMPHONY__') ) die('<h2>Error</h2><p>You cannot directly access this file</p>');
+if (!defined('__IN_SYMPHONY__')) die('<h2>Error</h2><p>You cannot directly access this file</p>');
 
+require_once 'lib/class.LSE.php';
 
-
-require_once('lib/class.LSE.php');
-
-
-
-Class Extension_Limit_Section_Entries extends Extension
+class extension_Limit_Section_Entries extends Extension
 {
     const DB_TABLE = 'tbl_sections';
 
@@ -47,21 +43,19 @@ Class Extension_Limit_Section_Entries extends Extension
      */
     private $_section = null;
 
+/*------------------------------------------------------------------------------------------------*/
+/*  Installation  */
+/*------------------------------------------------------------------------------------------------*/
 
-
-    /*------------------------------------------------------------------------------------------------*/
-    /*  Installation  */
-    /*------------------------------------------------------------------------------------------------*/
-
-    public function install(){
-        try{
+    public function install()
+    {
+        try {
             Symphony::Database()->query(sprintf(
                 "ALTER TABLE `%s` ADD `max_entries` INT(11) NOT NULL DEFAULT 0 AFTER `hidden`;",
                 self::DB_TABLE
             ));
-        }
-        catch( DatabaseException $dbe ){
-            if( $this->_tried_installation === false ){
+        } catch (DatabaseException $dbe) {
+            if ($this->_tried_installation === false) {
                 $this->_tried_installation = true;
 
                 $this->uninstall();
@@ -75,26 +69,25 @@ Class Extension_Limit_Section_Entries extends Extension
         return true;
     }
 
-    public function uninstall(){
-        try{
+    public function uninstall()
+    {
+        try {
             Symphony::Database()->query(sprintf(
                 "ALTER TABLE `%s` DROP `max_entries`;",
                 self::DB_TABLE
             ));
-        }
-        catch( DatabaseException $dbe ){
+        } catch (DatabaseException $dbe) {
         }
 
         return true;
     }
 
+/*------------------------------------------------------------------------------------------------*/
+/*  Delegates  */
+/*------------------------------------------------------------------------------------------------*/
 
-
-    /*------------------------------------------------------------------------------------------------*/
-    /*  Delegates  */
-    /*------------------------------------------------------------------------------------------------*/
-
-    public function getSubscribedDelegates(){
+    public function getSubscribedDelegates()
+    {
         return array(
             array(
                 'page' => '/backend/',
@@ -111,7 +104,6 @@ Class Extension_Limit_Section_Entries extends Extension
                 'delegate' => 'AdminPagePreGenerate',
                 'callback' => 'dAdminPagePreGenerate'
             ),
-
 
             array(
                 'page' => '/blueprints/sections/',
@@ -131,21 +123,23 @@ Class Extension_Limit_Section_Entries extends Extension
         );
     }
 
+/*------------------------------------------------------------------------------------------------*/
+/*  Backend  */
+/*------------------------------------------------------------------------------------------------*/
 
-
-    /*------------------------------------------------------------------------------------------------*/
-    /*  Backend  */
-    /*------------------------------------------------------------------------------------------------*/
-
-    public function dInitaliseAdminPageHead(){
+    public function dInitaliseAdminPageHead()
+    {
         $callback = Administration::instance()->getPageCallback();
 
         $this->_enabled = $this->_enable($callback);
-        if( !$this->_enabled ) return false;
+        if (!$this->_enabled) {
+            return false;
+        }
 
         $this->_section = LSE::getSection($callback['context']['section_handle']);
-        if( is_null($this->_section) ){
+        if (is_null($this->_section)) {
             $this->_enabled = false;
+
             return false;
         }
 
@@ -155,17 +149,16 @@ Class Extension_Limit_Section_Entries extends Extension
         $params = $this->_fetchUrlParams();
         $section_handle = $this->_section->get('handle');
 
-
         /* Manage redirects */
 
         // index page
-        if( $callback['context']['page'] === 'index' ){
+        if ($callback['context']['page'] === 'index') {
 
             // emulate Static section
-            if( $this->_max === 1 ){
+            if ($this->_max === 1) {
 
                 // entry exists, proceed to edit page
-                if( $this->_total > 0 && is_int($entry_id) ){
+                if ($this->_total > 0 && is_int($entry_id)) {
                     $this->_redirect(SYMPHONY_URL."/publish/{$section_handle}/edit/{$entry_id}/{$params}");
                 }
 
@@ -177,55 +170,56 @@ Class Extension_Limit_Section_Entries extends Extension
         }
 
         // new page
-        elseif( $callback['context']['page'] === 'new' ){
+        elseif ($callback['context']['page'] === 'new') {
 
             // only if there is a limit
-            if( $this->_max > 0 ){
+            if ($this->_max > 0) {
 
                 // if limit exceeded, proceed to index page
-                if( $this->_total >= $this->_max ){
+                if ($this->_total >= $this->_max) {
                     $this->_redirect(SYMPHONY_URL."/publish/{$section_handle}/{$params}");
                 }
             }
         }
     }
 
-    public function dAppendPageAlert(){
+    public function dAppendPageAlert()
+    {
         $callback = Administration::instance()->getPageCallback();
 
         // manipulate success message
-        if( in_array($callback['context']['page'], array('new', 'edit')) ){
+        if (in_array($callback['context']['page'], array('new', 'edit'))) {
             $flag_create = false;
             $flag_all = false;
 
             // if entry was created or saved
-            if( isset($callback['context']['flag']) ){
+            if (isset($callback['context']['flag'])) {
 
                 // if there is a limit
-                if( $this->_max > 0 ){
+                if ($this->_max > 0) {
                     $flag_create = true;
 
                     // if not static section
-                    if( $this->_max > 1 ){
+                    if ($this->_max > 1) {
                         $flag_all = true;
                     }
                 }
             }
 
             // if the status message must be changed
-            if( $flag_create || $flag_all ){
+            if ($flag_create || $flag_all) {
                 $link = '/publish/'.$callback['context']['section_handle'] . '/';
                 $new_link = $link . 'new/';
                 if (isset($_REQUEST['prepopulate'])) {
                     $new_link .= $callback['context']['oPage']->getPrepopulateString();
                 }
-                
+
                 $alerts = Administration::instance()->Page->Alert;
 
                 // remove old message
-                foreach( $alerts as $key => $alert ){
+                foreach ($alerts as $key => $alert) {
                     /** @var $alert Alert */
-                    if( $alert->type === Alert::SUCCESS ){
+                    if ($alert->type === Alert::SUCCESS) {
                         unset($alerts[$key]);
                     }
                 }
@@ -233,8 +227,8 @@ Class Extension_Limit_Section_Entries extends Extension
                 $msg = '';
 
                 // create / update message
-                if( $flag_create === true ){
-                    switch($callback['context']['flag']){
+                if ($flag_create === true) {
+                    switch ($callback['context']['flag']) {
                         case 'saved':
                             $msg = __('Entry updated at %s.', array(Widget::Time('now')->generate()));
                             break;
@@ -246,7 +240,7 @@ Class Extension_Limit_Section_Entries extends Extension
                 }
 
                 // more than one
-                if( $flag_all === true ) {
+                if ($flag_all === true) {
                     // create new message
                     if ($this->_total < $this->_max) {
                         $msg .= ' <a href="' . SYMPHONY_URL . $new_link . '" accesskey="c">' .
@@ -266,24 +260,26 @@ Class Extension_Limit_Section_Entries extends Extension
         }
     }
 
-    public function dAdminPagePreGenerate($context){
-        if( !$this->_enabled ) return false;
+    public function dAdminPagePreGenerate($context)
+    {
+        if (!$this->_enabled) {
+            return false;
+        }
 
         $callback = Administration::instance()->getPageCallback();
 
         // index page
-        if( $callback['context']['page'] === 'index' ){
+        if ($callback['context']['page'] === 'index') {
 
             /* Create button */
 
-            if( $this->_max > 0 && $this->_total >= $this->_max ){
+            if ($this->_max > 0 && $this->_total >= $this->_max) {
                 $context['oPage']->Context->getChild(1)->removeChildAt(0);
             }
 
-
             /* Feedback message */
 
-            if( $this->_max !== 0 ){
+            if ($this->_max !== 0) {
                 $msg_total_entries = $this->_total === 1
                     ? __('There is %d entry', array($this->_total))
                     : __('There are %d entries', array($this->_total));
@@ -291,10 +287,9 @@ Class Extension_Limit_Section_Entries extends Extension
                 $msg_max_entries = '';
                 $msg_create_more = '';
                 $msg_max_entries =  __(' out of a maximum of ') . $this->_max;
-                if( $this->_total >= $this->_max ){
+                if ($this->_total >= $this->_max) {
                     $msg_create_more = __("You can't create more entries.");
-                }
-                else{
+                } else {
                     $diff = $this->_max - $this->_total;
                     $msg_create_more = __('You can create %d more', array($diff));
                     $msg_create_more .= ' ' . ($diff === 1 ? __('entry') : __('entries')) . '.';
@@ -306,15 +301,15 @@ Class Extension_Limit_Section_Entries extends Extension
         }
 
         // new/edit page
-        elseif( in_array($callback['context']['page'], array('new', 'edit')) ){
+        elseif (in_array($callback['context']['page'], array('new', 'edit'))) {
 
             // replace breadcrumbs (emulate static section)
-            if( $this->_max === 1 ){
+            if ($this->_max === 1) {
                 $breadcrumbs = $context['oPage']->Context->getChild(0);
 
                 $children_count = $breadcrumbs->getNumberOfChildren();
 
-                for( $i=$children_count-1; $i>=0; $i-- )
+                for($i=$children_count-1; $i>=0; $i--)
                     $breadcrumbs->removeChildAt($i);
 
                 $breadcrumbs->appendChild(new XMLElement('h2', $this->_section->get('name')));
@@ -322,13 +317,12 @@ Class Extension_Limit_Section_Entries extends Extension
         }
     }
 
+/*------------------------------------------------------------------------------------------------*/
+/*  Blueprints sections  */
+/*------------------------------------------------------------------------------------------------*/
 
-
-    /*------------------------------------------------------------------------------------------------*/
-    /*  Blueprints sections  */
-    /*------------------------------------------------------------------------------------------------*/
-
-    public function dAddSectionElements($context){
+    public function dAddSectionElements($context)
+    {
         $fieldset = new XMLElement('fieldset', null, array('class' => 'settings'));
         $legend = new XMLElement('legend', __('Limit Section Entries'));
         $label = Widget::Label(__('Maximum entries'));
@@ -339,19 +333,20 @@ Class Extension_Limit_Section_Entries extends Extension
         $context['form']->insertChildAt(2, $fieldset);
     }
 
-    public function dSaveSectionSettings($context){
+    public function dSaveSectionSettings($context)
+    {
         $max_entries = (int) $context['meta']['max_entries'];
 
-        if( $max_entries < 0 ) $max_entries = 0;
+        if ($max_entries < 0) {
+            $max_entries = 0;
+        }
 
         $context['meta']['max_entries'] = $max_entries;
     }
 
-
-
-    /*------------------------------------------------------------------------------------------------*/
-    /*  In-house  */
-    /*------------------------------------------------------------------------------------------------*/
+/*------------------------------------------------------------------------------------------------*/
+/*  In-house  */
+/*------------------------------------------------------------------------------------------------*/
 
     /**
      * Makes sure we're in necessary context.
@@ -360,25 +355,33 @@ Class Extension_Limit_Section_Entries extends Extension
      *
      * @return bool
      */
-    private function _enable($callback){
-        if( $callback['driver'] !== 'publish' ) return false;
+    private function _enable($callback)
+    {
+        if ($callback['driver'] !== 'publish') {
+            return false;
+        }
 
         $page_modes = array('index', 'new', 'edit');
-        if( !in_array($callback['context']['page'], $page_modes) ) return false;
+        if (!in_array($callback['context']['page'], $page_modes)) {
+            return false;
+        }
 
         return true;
     }
 
-    private function _fetchUrlParams(){
-        if( count($_GET) > 2 ){
+    private function _fetchUrlParams()
+    {
+        if (count($_GET) > 2) {
             $params = "?";
         }
 
-        foreach( $_GET as $key => $value ){
-            if( in_array($key, array('symphony-page', 'mode')) ) continue;
+        foreach ($_GET as $key => $value) {
+            if (in_array($key, array('symphony-page', 'mode'))) {
+                continue;
+            }
 
             $params .= "{$key}={$value}";
-            if( next($_GET) ){
+            if (next($_GET)) {
                 $params .= '&';
             }
         }
@@ -386,9 +389,9 @@ Class Extension_Limit_Section_Entries extends Extension
         return $params;
     }
 
-    private function _redirect($url){
+    private function _redirect($url)
+    {
         header('HTTP/1.1 303 See Other');
         redirect($url);
     }
-
 }
