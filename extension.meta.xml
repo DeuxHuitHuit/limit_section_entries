@@ -24,6 +24,10 @@
 	</authors>
 
 	<releases>
+		<release version="1.1.2" date="2016-08-26" min="2.3" max="2.x.x"><![CDATA[
+			* Fix feedback message (thanks @michael-e)
+			* Marked as compatible with all 2.x version > 2.3
+		]]></release>
 		<release version="1.1.1" date="2014-08-26" min="2.3"><![CDATA[
 			* Updated english copywriting (thanks @nathanhornby)
 		]]></release>
