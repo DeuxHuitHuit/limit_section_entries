@@ -214,6 +214,12 @@
 
 				// if the status message must be changed
 				if( $flag_create || $flag_all ){
+					$link = '/publish/'.$callback['context']['section_handle'] . '/';
+					$new_link = $link . 'new/';
+					if (isset($_REQUEST['prepopulate'])) {
+						$new_link .= $callback['context']['oPage']->getPrepopulateString();
+					}
+					
 					$alerts = Administration::instance()->Page->Alert;
 
 					// remove old message
@@ -224,33 +230,35 @@
 						}
 					}
 
-					$msg_create = '';
-					$msg_all = '';
+					$msg = '';
 
 					// create / update message
 					if( $flag_create === true ){
 						switch($callback['context']['flag']){
 							case 'saved':
-								$msg_create = __('Entry updated at %s.', array(Widget::Time('now')->generate()));
+								$msg = __('Entry updated at %s.', array(Widget::Time('now')->generate()));
 								break;
 
 							case 'created':
-								$msg_create = __('Entry created at %s.', array(Widget::Time('now')->generate()));
+								$msg = __('Entry created at %s.', array(Widget::Time('now')->generate()));
 								break;
 						}
 					}
 
-					// view all message
-					if( $flag_all === true ){
-						$link = '/publish/'.$callback['context']['section_handle'] . '/';
-
-						$msg_all = ' <a href="' . SYMPHONY_URL . $link . '" accesskey="a">'
-							. __('View all Entries')
-							. '</a>';
+					// more than one
+					if( $flag_all === true ) {
+						// create new message
+						if ($this->_total < $this->_max) {
+							$msg .= ' <a href="' . SYMPHONY_URL . $new_link . '" accesskey="c">' .
+								__('Create another?') . '</a>';
+						}
+						// view all message
+						$msg .= ' <a href="' . SYMPHONY_URL . $link . '" accesskey="a">' .
+							__('View all Entries') . '</a>';
 					}
 
 					// append alert
-					$alerts[] = new Alert($msg_create.$msg_all, Alert::SUCCESS);
+					$alerts[] = new Alert($msg, Alert::SUCCESS);
 
 					// replace Alerts
 					Administration::instance()->Page->Alert = $alerts;
@@ -288,7 +296,7 @@
 					}
 					else{
 						$diff = $this->_max - $this->_total;
-						$msg_create_more = __("You can create %d more", array($diff));
+						$msg_create_more = __('You can create %d more', array($diff));
 						$msg_create_more .= ' ' . ($diff === 1 ? __('entry') : __('entries')) . '.';
 					}
 					$feedback = $msg_total_entries.$msg_max_entries.'. '.$msg_create_more;
