@@ -1,108 +1,121 @@
 <?php
 
+require_once TOOLKIT.'/class.entrymanager.php';
+require_once TOOLKIT.'/class.sectionmanager.php';
 
+/**
+ * Offers some utility methods to access info regarding entry limits for a Section.
+ */
+final class LSE
+{
 
-	require_once (TOOLKIT.'/class.entrymanager.php');
-	require_once (TOOLKIT.'/class.sectionmanager.php');
+    /**
+     * Get a Section object from a handle or ID. If section is not found, returns null
+     *
+     * @param $section (optional) - section handle or ID. If null, section handle will be taken form $callback
+     *
+     * @return null|Section
+     */
+    public static function getSection($section = null)
+    {
+        if ($section instanceof Section) {
+            return $section;
+        }
 
+        if ($section === null) {
+            $callback = Administration::instance()->getPageCallback();
 
+            if (!isset($callback['context']['section_handle'])) {
+                return null;
+            }
 
-	/**
-	 * Offers some utility methods to access info regarding entry limits for a Section.
-	 */
-	Final Class LSE
-	{
+            $section = $callback['context']['section_handle'];
+        }
 
-		/**
-		 * Get a Section object from a handle or ID. If section is not found, returns null
-		 *
-		 * @param $section (optional) - section handle or ID. If null, section handle will be taken form $callback
-		 *
-		 * @return null|Section
-		 */
-		public static function getSection($section = null){
-			if( $section instanceof Section ) return $section;
+        $section_id = is_numeric($section) ? $section : SectionManager::fetchIDFromHandle($section);
 
-			if( $section === null ){
-				$callback = Administration::instance()->getPageCallback();
+        $s = SectionManager::fetch($section_id);
 
-				if( !isset($callback['context']['section_handle']) ) return null;
+        if (!$s instanceof Section) {
+            return null;
+        }
 
-				$section = $callback['context']['section_handle'];
-			}
+        return $s;
+    }
 
-			$section_id = is_numeric( $section ) ? $section : SectionManager::fetchIDFromHandle( $section );
+    /**
+     * Get the ID of the last entry. Last == sorting by the field from Section index
+     *
+     * @param $section
+     * @see LSE::getSection()
+     *
+     * @return int|null
+     */
+    public static function getLastEntryID($section = null)
+    {
+        if (!$s = self::getSection($section)) {
+            return null;
+        }
 
-			$s = SectionManager::fetch( $section_id );
+        EntryManager::setFetchSortingDirection('DESC');
+        $entry = EntryManager::fetch(null, $s->get('id'), 1);
 
-			if( !$s instanceof Section ) return null;
+        if (!is_array($entry) || empty($entry)) {
+            return null;
+        }
 
-			return $s;
-		}
+        $entry = current($entry);
+        $id = (int) $entry->get('id');
 
-		/**
-		 * Get the ID of the last entry. Last == sorting by the field from Section index
-		 *
-		 * @param $section
-		 * @see LSE::getSection()
-		 *
-		 * @return int|null
-		 */
-		public static function getLastEntryID($section = null){
-			if( ! $s = self::getSection( $section ) ) return null;
+        return $id;
+    }
 
-			EntryManager::setFetchSortingDirection( 'DESC' );
-			$entry = EntryManager::fetch( null, $s->get( 'id' ), 1 );
+    /**
+     * Get the total number of entries in this Section
+     *
+     * @param $section
+     * @see LSE::getSection()
+     *
+     * @return int
+     */
+    public static function getTotalEntries($section = null)
+    {
+        if (!$s = self::getSection($section)) {
+            return null;
+        }
 
-			if( !is_array( $entry ) || empty($entry) ) return null;
+        try {
+            $count = Symphony::Database()->fetch(sprintf(
+                "SELECT COUNT(*) FROM `tbl_entries` WHERE `section_id` = '%s'",
+                $s->get('id')
+            ) );
 
-			$entry = current( $entry );
-			$id = (int) $entry->get( 'id' );
+            if (is_array($count)) {
+                $count = $count[0]['COUNT(*)'];
+            }
+        } catch (DatabaseException $dbe) {
+            $count = 0;
+        }
 
-			return $id;
-		}
+        return (int) $count;
+    }
 
-		/**
-		 * Get the total number of entries in this Section
-		 *
-		 * @param $section
-		 * @see LSE::getSection()
-		 *
-		 * @return int
-		 */
-		public static function getTotalEntries($section = null){
-			if( ! $s = self::getSection( $section ) ) return null;
+    /**
+     * Get the maximum number of entries for this Section.
+     *
+     * @param $section
+     * @see LSE::getSection()
+     *
+     * @return int
+     */
+    public static function getMaxEntries($section = null)
+    {
+        if (!$s = self::getSection($section)) {
+            return null;
+        }
 
-			try{
-				$count = Symphony::Database()->fetch( sprintf(
-					"SELECT COUNT(*) FROM `tbl_entries` WHERE `section_id` = '%s'",
-					$s->get( 'id' )
-				) );
+        $count = (int) $s->get('max_entries');
 
-				if( is_array( $count ) ){
-					$count = $count[0]['COUNT(*)'];
-				}
-			} catch( DatabaseException $dbe ){
-				$count = 0;
-			}
-
-			return (int) $count;
-		}
-
-		/**
-		 * Get the maximum number of entries for this Section.
-		 *
-		 * @param $section
-		 * @see LSE::getSection()
-		 *
-		 * @return int
-		 */
-		public static function getMaxEntries($section = null){
-			if( ! $s = self::getSection( $section ) ) return null;
-
-			$count = (int) $s->get( 'max_entries' );
-
-			return $count;
-		}
-
-	}
+        return $count;
+    }
+}
