@@ -58,14 +58,14 @@ final class LSE
         }
 
         EntryManager::setFetchSortingDirection('DESC');
-        $entry = EntryManager::fetch(null, $s->get('id'), 1);
+        $entry = EntryManager::fetch(null, $s->get('id'), 1, 0, null, null, true, false, null, false);
 
         if (!is_array($entry) || empty($entry)) {
             return null;
         }
-
+        reset($entry);
         $entry = current($entry);
-        $id = (int) $entry->get('id');
+        $id = (int) $entry['id'];
 
         return $id;
     }
