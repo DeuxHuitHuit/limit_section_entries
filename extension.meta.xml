@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <extension id="limit_section_entries" status="released" xmlns="http://symphony-cms.com/schemas/extension/1.0">
-
 	<name>Limit Section Entries</name>
-
 	<description>Offers a way to limit the maximum number of entries in a section.</description>
-
 	<repo type="github">https://github.com/DeuxHuitHuit/limit_section_entries</repo>
 	<url type="issues">https://github.com/DeuxHuitHuit/limit_section_entries/issues</url>
 	<url type="discuss">http://www.getsymphony.com/discuss/thread/88073/</url>
-
 	<types>
 		<type>Interface</type>
 		<type>Workflow</type>
 	</types>
-
 	<authors>
 		<author>
 			<name github="vlad-ghita" symphony="vladG">Vlad Ghita</name>
@@ -26,8 +21,10 @@
 			<website>https://deuxhuithuit.com/</website>
 		</author>
 	</authors>
-
 	<releases>
+		<release version="1.2.1" date="2017-03-31" min="2.3" max="2.x.x"><![CDATA[
+			* Fix issue with performance and errors when getting the id
+		]]></release>
 		<release version="1.2.0" date="2017-03-21" min="2.3" max="2.x.x"><![CDATA[
 			* Fix feedback message (thanks @michael-e)
 			* Added missing 'Create another?'
@@ -39,18 +36,14 @@
 		<release version="1.1.0" date="2012-12-19" min="2.3"><![CDATA[
 			* Adapt entry create / save message to reflect Section limit.
 		]]></release>
-
 		<release version="1.0.2" date="2012-12-19" min="2.3"><![CDATA[
 			* Refactor PHP code to allow external usage.
 		]]></release>
-
 		<release version="1.0.1" date="2012-05-18" min="2.3"><![CDATA[
 			* Move `Maximum entries` input below section `Name` on section settings page.
 		]]></release>
-
 		<release version="1.0" date="2012-05-18" min="2.3"><![CDATA[
 			* Initial release
 		]]></release>
 	</releases>
-
 </extension>
