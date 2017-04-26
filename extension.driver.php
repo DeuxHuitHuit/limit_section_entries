@@ -303,7 +303,7 @@ class extension_Limit_Section_Entries extends Extension
             /* Create button */
 
             if ($this->_max > 0 && $this->_total >= $this->_max) {
-                $context['oPage']->Context->getChild(1)->removeChildAt(0);
+                $context['oPage']->Context->getChild(1)->removeChildAt(count($context['oPage']->Context->getChild(1)->getChildren()) - 1);
             }
         }
 
