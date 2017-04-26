@@ -261,26 +261,7 @@ class extension_Limit_Section_Entries extends Extension
                 // replace Alerts
                 Administration::instance()->Page->Alert = $alerts;
             }
-        }
-    }
-
-    public function dAdminPagePreGenerate($context)
-    {
-        if (!$this->_enabled) {
-            return false;
-        }
-
-        $callback = Administration::instance()->getPageCallback();
-
-        // index page
-        if ($callback['context']['page'] === 'index') {
-
-            /* Create button */
-
-            if ($this->_max > 0 && $this->_total >= $this->_max) {
-                $context['oPage']->Context->getChild(1)->removeChildAt(0);
-            }
-
+        } else if ($callback['context']['page'] === 'index') {
             /* Feedback message */
 
             if ($this->_max !== 0) {
@@ -300,7 +281,31 @@ class extension_Limit_Section_Entries extends Extension
                 }
                 $feedback = $msg_total_entries.$msg_max_entries.'. '.$msg_create_more;
 
-                $context['oPage']->Context->appendChild(new XMLElement('p', $feedback, array('style' => 'padding: 10px 0 20px 0; margin: 0;')));
+                //$context['oPage']->Context->appendChild(new XMLElement('p', $feedback, array('style' => 'padding: 10px 0 20px 0; margin: 0;')));
+
+                $alerts = Administration::instance()->Page->Alert;
+                $alerts[] = new Alert($feedback, Alert::NOTICE);
+
+                Administration::instance()->Page->Alert = $alerts;
+            }
+        }
+    }
+
+    public function dAdminPagePreGenerate($context)
+    {
+        if (!$this->_enabled) {
+            return false;
+        }
+
+        $callback = Administration::instance()->getPageCallback();
+
+        // index page
+        if ($callback['context']['page'] === 'index') {
+
+            /* Create button */
+
+            if ($this->_max > 0 && $this->_total >= $this->_max) {
+                $context['oPage']->Context->getChild(1)->removeChildAt(0);
             }
         }
 
