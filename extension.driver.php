@@ -281,8 +281,6 @@ class extension_Limit_Section_Entries extends Extension
                 }
                 $feedback = $msg_total_entries.$msg_max_entries.'. '.$msg_create_more;
 
-                //$context['oPage']->Context->appendChild(new XMLElement('p', $feedback, array('style' => 'padding: 10px 0 20px 0; margin: 0;')));
-
                 $alerts = Administration::instance()->Page->Alert;
                 $alerts[] = new Alert($feedback, Alert::NOTICE);
 
