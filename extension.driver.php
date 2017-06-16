@@ -143,6 +143,10 @@ class extension_Limit_Section_Entries extends Extension
             return false;
         }
 
+        if ($_SERVER['REQUEST_METHOD'] !== 'GET' || isset($_GET['no-lse-redirect'])) {
+            return false;
+        }
+
         $this->_max = LSE::getMaxEntries($this->_section);
         $this->_total = LSE::getTotalEntries($this->_section);
         $entry_id = LSE::getLastEntryID($this->_section);
