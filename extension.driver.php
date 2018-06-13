@@ -50,10 +50,17 @@ class extension_Limit_Section_Entries extends Extension
     public function install()
     {
         try {
-            Symphony::Database()->query(sprintf(
-                "ALTER TABLE `%s` ADD `max_entries` INT(11) NOT NULL DEFAULT 0 AFTER `hidden`;",
-                self::DB_TABLE
-            ));
+            Symphony::Database()
+                ->alter(self::DB_TABLE)
+                ->add([
+                    'max_entries' => [
+                        'type' => 'int(11)',
+                        'default' => 0,
+                    ],
+                ])
+                ->after('hidden')
+                ->execute()
+                ->success();
         } catch (DatabaseException $dbe) {
             if ($this->_tried_installation === false) {
                 $this->_tried_installation = true;
@@ -72,10 +79,11 @@ class extension_Limit_Section_Entries extends Extension
     public function uninstall()
     {
         try {
-            Symphony::Database()->query(sprintf(
-                "ALTER TABLE `%s` DROP `max_entries`;",
-                self::DB_TABLE
-            ));
+            Symphony::Database()
+                ->alter(self::DB_TABLE)
+                ->drop('max_entries')
+                ->execute()
+                ->success();
         } catch (DatabaseException $dbe) {
         }
 

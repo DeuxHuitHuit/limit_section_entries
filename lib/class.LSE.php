@@ -85,13 +85,15 @@ final class LSE
         }
 
         try {
-            $count = Symphony::Database()->fetch(sprintf(
-                "SELECT COUNT(*) FROM `tbl_entries` WHERE `section_id` = '%s'",
-                $s->get('id')
-            ) );
+            $count = Symphony::Database()
+                ->select(['count(*)'])
+                ->from('tbl_entries')
+                ->where(['section_id' => $s->get('id')])
+                ->execute()
+                ->rows();
 
             if (is_array($count)) {
-                $count = $count[0]['COUNT(*)'];
+                $count = $count[0]['count(*)'];
             }
         } catch (DatabaseException $dbe) {
             $count = 0;
