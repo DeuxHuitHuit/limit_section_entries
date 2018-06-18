@@ -34,7 +34,7 @@ final class LSE
 
         $section_id = is_numeric($section) ? $section : SectionManager::fetchIDFromHandle($section);
 
-        $s = SectionManager::fetch($section_id);
+        $s = (new SectionManager)->select()->section($section_id)->execute()->next();
 
         if (!$s instanceof Section) {
             return null;
@@ -57,10 +57,9 @@ final class LSE
             return null;
         }
 
-        EntryManager::setFetchSortingDirection('DESC');
-        $entry = EntryManager::fetch(null, $s->get('id'), 1, 0, null, null, true, false, null, false);
+        $entry = (new EntryManager)->select()->section($s->get('id'))->sort('system:id', 'DESC')->limit(1)->execute()->next();
 
-        if (!is_array($entry) || empty($entry)) {
+        if (!$entry) {
             return null;
         }
         reset($entry);
