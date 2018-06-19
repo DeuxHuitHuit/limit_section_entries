@@ -34,7 +34,11 @@ final class LSE
 
         $section_id = is_numeric($section) ? $section : SectionManager::fetchIDFromHandle($section);
 
-        $s = (new SectionManager)->select()->section($section_id)->execute()->next();
+        $s = (new SectionManager)
+            ->select()
+            ->section($section_id)
+            ->execute()
+            ->next();
 
         if (!$s instanceof Section) {
             return null;
@@ -57,7 +61,13 @@ final class LSE
             return null;
         }
 
-        $entry = (new EntryManager)->select()->section($s->get('id'))->sort('system:id', 'DESC')->limit(1)->execute()->next();
+        $entry = (new EntryManager)
+            ->select()
+            ->section($s->get('id'))
+            ->sort('system:id', 'desc')
+            ->limit(1)
+            ->execute()
+            ->next();
 
         if (!$entry) {
             return null;
