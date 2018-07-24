@@ -61,22 +61,14 @@ final class LSE
             return null;
         }
 
-        $entry = (new EntryManager)
-            ->select()
+        return (new EntryManager)
+            ->select([])
+            ->projection(['e.id'])
             ->section($s->get('id'))
             ->sort('system:id', 'desc')
             ->limit(1)
             ->execute()
-            ->next();
-
-        if (!$entry) {
-            return null;
-        }
-        reset($entry);
-        $entry = current($entry);
-        $id = (int) $entry['id'];
-
-        return $id;
+            ->integer('id');
     }
 
     /**
@@ -92,18 +84,16 @@ final class LSE
         if (!$s = self::getSection($section)) {
             return null;
         }
+        $count = 0;
 
         try {
             $count = Symphony::Database()
-                ->select(['count(*)'])
+                ->select()
+                ->count()
                 ->from('tbl_entries')
                 ->where(['section_id' => $s->get('id')])
                 ->execute()
-                ->rows();
-
-            if (is_array($count)) {
-                $count = $count[0]['count(*)'];
-            }
+                ->integer(0);
         } catch (DatabaseException $dbe) {
             $count = 0;
         }
@@ -125,8 +115,6 @@ final class LSE
             return null;
         }
 
-        $count = (int) $s->get('max_entries');
-
-        return $count;
+        return (int) $s->get('max_entries');
     }
 }
