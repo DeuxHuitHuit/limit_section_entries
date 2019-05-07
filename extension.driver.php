@@ -50,10 +50,17 @@ class extension_Limit_Section_Entries extends Extension
     public function install()
     {
         try {
-            Symphony::Database()->query(sprintf(
-                "ALTER TABLE `%s` ADD `max_entries` INT(11) NOT NULL DEFAULT 0 AFTER `hidden`;",
-                self::DB_TABLE
-            ));
+            Symphony::Database()
+                ->alter(self::DB_TABLE)
+                ->add([
+                    'max_entries' => [
+                        'type' => 'int(11)',
+                        'default' => 0,
+                    ],
+                ])
+                ->after('hidden')
+                ->execute()
+                ->success();
         } catch (DatabaseException $dbe) {
             if ($this->_tried_installation === false) {
                 $this->_tried_installation = true;
@@ -72,10 +79,11 @@ class extension_Limit_Section_Entries extends Extension
     public function uninstall()
     {
         try {
-            Symphony::Database()->query(sprintf(
-                "ALTER TABLE `%s` DROP `max_entries`;",
-                self::DB_TABLE
-            ));
+            Symphony::Database()
+                ->alter(self::DB_TABLE)
+                ->drop('max_entries')
+                ->execute()
+                ->success();
         } catch (DatabaseException $dbe) {
         }
 
@@ -261,26 +269,7 @@ class extension_Limit_Section_Entries extends Extension
                 // replace Alerts
                 Administration::instance()->Page->Alert = $alerts;
             }
-        }
-    }
-
-    public function dAdminPagePreGenerate($context)
-    {
-        if (!$this->_enabled) {
-            return false;
-        }
-
-        $callback = Administration::instance()->getPageCallback();
-
-        // index page
-        if ($callback['context']['page'] === 'index') {
-
-            /* Create button */
-
-            if ($this->_max > 0 && $this->_total >= $this->_max) {
-                $context['oPage']->Context->getChild(1)->removeChildAt(0);
-            }
-
+        } else if ($callback['context']['page'] === 'index') {
             /* Feedback message */
 
             if ($this->_max !== 0) {
@@ -300,7 +289,29 @@ class extension_Limit_Section_Entries extends Extension
                 }
                 $feedback = $msg_total_entries.$msg_max_entries.'. '.$msg_create_more;
 
-                $context['oPage']->Context->appendChild(new XMLElement('p', $feedback, array('style' => 'padding: 10px 0 20px 0; margin: 0;')));
+                $alerts = Administration::instance()->Page->Alert;
+                $alerts[] = new Alert($feedback, Alert::NOTICE);
+
+                Administration::instance()->Page->Alert = $alerts;
+            }
+        }
+    }
+
+    public function dAdminPagePreGenerate($context)
+    {
+        if (!$this->_enabled) {
+            return false;
+        }
+
+        $callback = Administration::instance()->getPageCallback();
+
+        // index page
+        if ($callback['context']['page'] === 'index') {
+
+            /* Create button */
+
+            if ($this->_max > 0 && $this->_total >= $this->_max) {
+                $context['oPage']->Context->getChild(1)->removeChildAt(count($context['oPage']->Context->getChild(1)->getChildren()) - 1);
             }
         }
 

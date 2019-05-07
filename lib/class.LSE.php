@@ -34,7 +34,11 @@ final class LSE
 
         $section_id = is_numeric($section) ? $section : SectionManager::fetchIDFromHandle($section);
 
-        $s = SectionManager::fetch($section_id);
+        $s = (new SectionManager)
+            ->select()
+            ->section($section_id)
+            ->execute()
+            ->next();
 
         if (!$s instanceof Section) {
             return null;
@@ -57,17 +61,14 @@ final class LSE
             return null;
         }
 
-        EntryManager::setFetchSortingDirection('DESC');
-        $entry = EntryManager::fetch(null, $s->get('id'), 1, 0, null, null, true, false, null, false);
-
-        if (!is_array($entry) || empty($entry)) {
-            return null;
-        }
-        reset($entry);
-        $entry = current($entry);
-        $id = (int) $entry['id'];
-
-        return $id;
+        return (new EntryManager)
+            ->select([])
+            ->projection(['e.id'])
+            ->section($s->get('id'))
+            ->sort('system:id', 'desc')
+            ->limit(1)
+            ->execute()
+            ->integer('id');
     }
 
     /**
@@ -83,16 +84,16 @@ final class LSE
         if (!$s = self::getSection($section)) {
             return null;
         }
+        $count = 0;
 
         try {
-            $count = Symphony::Database()->fetch(sprintf(
-                "SELECT COUNT(*) FROM `tbl_entries` WHERE `section_id` = '%s'",
-                $s->get('id')
-            ) );
-
-            if (is_array($count)) {
-                $count = $count[0]['COUNT(*)'];
-            }
+            $count = Symphony::Database()
+                ->select()
+                ->count()
+                ->from('tbl_entries')
+                ->where(['section_id' => $s->get('id')])
+                ->execute()
+                ->integer(0);
         } catch (DatabaseException $dbe) {
             $count = 0;
         }
@@ -114,8 +115,6 @@ final class LSE
             return null;
         }
 
-        $count = (int) $s->get('max_entries');
-
-        return $count;
+        return (int) $s->get('max_entries');
     }
 }
